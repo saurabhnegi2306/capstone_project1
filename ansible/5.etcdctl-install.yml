@@ -1,0 +1,65 @@
+- name: Install etcdctl
+  hosts: control_plane
+  become: true
+  vars:
+    etcd_version: "v3.5.15"
+    crictl_version: "v1.33.0"
+
+  tasks:
+    - name: Download etcd
+      ansible.builtin.get_url:
+        url: "https://github.com/etcd-io/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+        dest: /tmp/etcd.tar.gz
+        mode: '0644'
+
+    - name: Extract etcd archive
+      ansible.builtin.unarchive:
+        src: /tmp/etcd.tar.gz
+        dest: /tmp
+        remote_src: true
+
+    - name: Install etcdctl
+      ansible.builtin.copy:
+        src: "/tmp/etcd-{{ etcd_version }}-linux-amd64/etcdctl"
+        dest: /usr/local/bin/etcdctl
+        mode: '0755'
+        remote_src: true
+
+    - name: Verify installation
+      ansible.builtin.command: etcdctl version
+      register: etcdctl_version
+
+    - name: Download crictl
+      ansible.builtin.get_url:
+        url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-amd64.tar.gz"
+        dest: /tmp/crictl.tar.gz
+        mode: '0644'
+
+    - name: Extract crictl
+      ansible.builtin.unarchive:
+        src: /tmp/crictl.tar.gz
+        dest: /usr/local/bin
+        remote_src: true
+      become: true
+
+    - name: Configure crictl
+      ansible.builtin.copy:
+        dest: /etc/crictl.yaml
+        content: |
+          runtime-endpoint: unix:///run/containerd/containerd.sock
+          image-endpoint: unix:///run/containerd/containerd.sock
+          timeout: 10
+          debug: false
+        mode: '0644'
+      become: true
+
+    - name: Verify installation
+      ansible.builtin.command: crictl --version
+      register: crictl_version
+
+    - name: Display version
+      ansible.builtin.debug:
+        var: crictl_version.stdout        
+
+    - debug:
+        var: etcdctl_version.stdout        

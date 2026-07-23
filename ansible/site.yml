@@ -1,0 +1,11 @@
+---
+- import_playbook: 1.prepare-nodes.yml
+- import_playbook: 2.init-control-plane.yml
+- import_playbook: 3.join-workers.yml
+
+- import_playbook: 4.set-provider-ids.yml
+
+- import_playbook: 5.install-nlb-controller-metrics-server.yml
+
+- import_playbook: 6.install-application.yaml
+- import_playbook: 7.etcdctl-install.yml

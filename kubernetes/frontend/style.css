@@ -1,0 +1,81 @@
+body{
+
+    background:#f3f4f6;
+
+    font-family:Arial;
+
+}
+
+.container{
+
+    width:900px;
+
+    margin:auto;
+
+    margin-top:40px;
+
+}
+
+.card{
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:8px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+}
+
+input{
+
+    width:100%;
+
+    padding:10px;
+
+    margin-top:10px;
+
+}
+
+button{
+
+    padding:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    border:none;
+
+    margin-top:10px;
+
+    cursor:pointer;
+
+}
+
+table{
+
+    width:100%;
+
+    margin-top:25px;
+
+    border-collapse:collapse;
+
+}
+
+th,td{
+
+    border:1px solid #ddd;
+
+    padding:10px;
+
+}
+
+th{
+
+    background:#2563eb;
+
+    color:white;
+
+}

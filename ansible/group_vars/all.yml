@@ -1,0 +1,38 @@
+---
+# REQUIRED INPUTS
+aws_region: us-east-1
+vpc_id: vpc-05b57d73ac3ceb13e # Existing VPC ID
+ami_id: ami-06067086cf86c58e6 # Amazon Linux 2023, mandatory Paramter, Region/OS-Type Specific
+instance_type: t3.medium # mandatory Paramter
+
+# PROJECT SETTINGS
+cluster_name: easypay-k8s
+
+
+# Choose a CIDR that does not overlap an existing subnet in your VPC
+control_plane_subnet_cidr: "172.31.96.0/24"
+worker_1_subnet_cidr: "172.31.97.0/24"
+worker_2_subnet_cidr: "172.31.98.0/24"
+
+ssh_user: ec2-user # As per ami_id, for ubuntu based AMI its ubuntu.
+
+# Kubernetes
+kubernetes_minor: "v1.33"            # Kubernetes version of the cluster. Prefer 1.30 + 
+pod_network_cidr: "192.168.0.0/16"   # Any subnet which you want to use for pods to use. 
+
+aws_load_balancer_controller_enabled: true
+nlb_scheme: internet-facing     # To create a public Loadbalancer.
+frontend_service_port: 80       # Loadbalacner port where we will access the LoadBalancer URL.
+frontend_node_port: 30080       # Loadbalancer will forward traffic to this node port on all Nodes.
+# AWS Load Balancer Controller IAM
+nlb_controller_role_name: "{{ cluster_name }}-nlb-controller-role"
+nlb_controller_policy_name: "{{ cluster_name }}-nlb-controller-policy"
+nlb_controller_instance_profile_name: "{{ cluster_name }}-nlb-controller-profile"
+
+# Generated automatically
+key_name: "{{ cluster_name }}-key"
+local_private_key_path: "{{ lookup('env', 'HOME') }}/.ssh/{{ cluster_name }}"
+local_public_key_path: "{{ lookup('env', 'HOME') }}/.ssh/{{ cluster_name }}.pub"
+
+
+# Devops: Container Orchestration using Kubernetes course lab, but for aws used elective course lab
