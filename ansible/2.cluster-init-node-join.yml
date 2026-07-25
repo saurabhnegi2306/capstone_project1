@@ -4,7 +4,7 @@
   become: true
   gather_facts: false
   vars_files:
-    - group_vars/all.yml
+    - group_vars/all_lab.yml
 
   tasks:
     - name: Initialize cluster
