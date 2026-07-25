@@ -60,6 +60,18 @@
         regexp: 'cidr: 192\\.168\\.0\\.0/16'
         replace: "cidr: {{ pod_network_cidr }}"
 
+    - name: Wait for Installation CRD
+      become_user: "{{ ansible_user }}"
+      environment:
+        KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+      shell: |
+        kubectl get crd installations.operator.tigera.io
+      register: crd_check
+      retries: 30
+      delay: 10
+      until: crd_check.rc == 0
+      changed_when: false
+      
     - name: Apply Calico
       become_user: "{{ ansible_user }}"
       ansible.builtin.command: kubectl apply -f /tmp/calico-custom-resources.yaml
