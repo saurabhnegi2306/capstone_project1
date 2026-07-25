@@ -1,0 +1,22 @@
+---
+# REQUIRED INPUTS
+aws_region: us-west-2
+vpc_id: vpc-023a4d7a # Existing VPC ID for Lab worker nodes
+
+# PROJECT SETTINGS
+cluster_name: easypay-k8s
+
+ssh_user: ec2-user # As per ami_id, for ubuntu based AMI its ubuntu.
+
+# Kubernetes
+kubernetes_minor: "v1.33"            # Kubernetes version of the cluster. Prefer 1.30 + 
+pod_network_cidr: "192.168.0.0/16"   # Any subnet which you want to use for pods to use. 
+
+aws_load_balancer_controller_enabled: true
+nlb_scheme: internet-facing     # To create a public Loadbalancer.
+frontend_service_port: 80       # Loadbalacner port where we will access the LoadBalancer URL.
+frontend_node_port: 30080       # Loadbalancer will forward traffic to this node port on all Nodes.
+# AWS Load Balancer Controller IAM
+nlb_controller_role_name: "{{ cluster_name }}-nlb-controller-role"
+nlb_controller_policy_name: "{{ cluster_name }}-nlb-controller-policy"
+nlb_controller_instance_profile_name: "{{ cluster_name }}-nlb-controller-profile"
