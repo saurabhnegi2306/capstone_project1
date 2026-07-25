@@ -114,23 +114,30 @@
           - gpg
         state: present
         
-    - name: Download Kubernetes GPG key
-      ansible.builtin.get_url:
+    - name: Download Kubernetes Release key
+      get_url:
         url: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_minor }}/deb/Release.key"
         dest: /tmp/kubernetes.key
+        mode: "0644"
 
-    - name: Dearmor Kubernetes GPG key
-      ansible.builtin.shell: |
-        gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes.key
+    - name: Convert Release key to GPG keyring
+      command: >
+        gpg --dearmor
+        -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        /tmp/kubernetes.key
       args:
         creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
     - name: Add Kubernetes repository
-      ansible.builtin.copy:
+      copy:
         dest: /etc/apt/sources.list.d/kubernetes.list
         content: |
           deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubernetes_minor }}/deb/ /
 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+          
     - name: Install Kubernetes packages
       ansible.builtin.apt:
         update_cache: yes
