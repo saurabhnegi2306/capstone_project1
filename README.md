@@ -841,14 +841,14 @@ Build the image.
 docker build -t easypay-backend:v1 .
 ```
 
-Tag the image.
+Tag the image to your own Docker Repository.
 
 ```bash
 docker tag easypay-backend:v1 \
 saurabhnegi2306/easypay:backend-v1
 ```
 
-Push the image.
+Push the image to your own Docker Repository.
 
 ```bash
 docker push saurabhnegi2306/easypay:backend-v1
@@ -897,14 +897,14 @@ Build the image.
 docker build -t easypay-frontend:v1 .
 ```
 
-Tag it.
+Tag it with your own Docker Repository..
 
 ```bash
 docker tag easypay-frontend:v1 \
 saurabhnegi2306/easypay:frontend-v1
 ```
 
-Push the image.
+Push the image to your own Docker Repository..
 
 ```bash
 docker push saurabhnegi2306/easypay:frontend-v1
@@ -960,7 +960,7 @@ image: saurabhnegi2306/easypay:backend-v1
 image: saurabhnegi2306/easypay:frontend-v1
 ```
 
-If you are using the same repository names as the lab guide, no changes are required.
+**If you are using the same repository names as the lab guide, no changes are required.**
 
 ---
 
