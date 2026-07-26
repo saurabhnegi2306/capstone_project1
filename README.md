@@ -145,7 +145,7 @@ The objective is to automate the entire infrastructure and application deploymen
 
 ## AWS
 
-- AWS Account
+- AWS Account ( Free tier account or Lab account where t3.small or t3.medium can be launched)
 - IAM User
 - Access Key
 - Secret Key
@@ -164,7 +164,7 @@ aws sts get-caller-identity
 
 ---
 
-## Install Python Dependencies
+## Install Python Dependencies ( On Local VM )
 
 ```bash
 pip install boto3 botocore
@@ -172,7 +172,7 @@ pip install boto3 botocore
 
 ---
 
-## Install Required Ansible Collections
+## Install Required Ansible Collections ( On Local VM )
 
 ```bash
 ansible-galaxy collection install -r requirements.yml
@@ -180,7 +180,7 @@ ansible-galaxy collection install -r requirements.yml
 
 ---
 
-# ☁ AWS Infrastructure Provisioning
+# ☁ AWS Infrastructure Provisioning  ( On Local VM )
 
 The first playbook provisions the complete AWS infrastructure.
 
@@ -302,11 +302,12 @@ Update vars.yml
 
 # 📸 Expected Output
 
-> Insert the original provisioning screenshots from the document here **without changing their order or captions**.
+> <img width="1078" height="133" alt="image" src="https://github.com/user-attachments/assets/50e9feae-6795-4da8-895e-4113bb90b69e" />
+
 
 ---
 
-# ✅ Verification
+# ✅ Verification  ( On Local VM )
 
 Verify the newly created infrastructure.
 
@@ -316,22 +317,18 @@ List EC2 instances
 aws ec2 describe-instances
 ```
 
-Verify Ansible inventory
+Verify Ansible inventory , Should have deteails of new control plane and worker nodes.
 
 ```bash
 cat inventory.ini
 ```
 
-Verify generated variables
-
-```bash
-cat vars.yml
-```
-
-Test SSH connectivity
+Test SSH connectivity ( should work without password/ssh-keys as keys are alaready copied )
 
 ```bash
 ssh -i ~/.ssh/generated-key ubuntu@<CONTROL-PLANE-IP>
+ssh -i ~/.ssh/generated-key ubuntu@<WORKER1-IP>
+ssh -i ~/.ssh/generated-key ubuntu@<WORKER2-IP>
 ```
 
 ---
@@ -367,7 +364,7 @@ The following playbook installs:
 - Helm
 - Required system packages
 
-Execute:
+Execute:  ( On Local VM )
 
 ```bash
 ansible-playbook 1.prepare-nodes.yml
@@ -419,11 +416,12 @@ Enable Services
 
 # 📸 Expected Output
 
-> Insert the screenshots from the **Node Preparation** section of the original document here.
+> <img width="1038" height="182" alt="image" src="https://github.com/user-attachments/assets/c15addd2-d5ba-421c-9776-ff44b13c5a7f" />
+
 
 ---
 
-# 🔍 Verify Node Connectivity
+# 🔍 Verify Node Connectivity  ( On Local VM )
 
 After the playbook completes successfully, verify SSH connectivity to the Control Plane node.
 
@@ -431,15 +429,13 @@ After the playbook completes successfully, verify SSH connectivity to the Contro
 ssh -i ~/.ssh/easypay-k8s ec2-user@<CONTROL_PLANE_PUBLIC_IP>
 ```
 
-Exit the node after verifying access.
-
 ```bash
 exit
 ```
 
 ---
 
-# ☸ Initialize Kubernetes Cluster
+# ☸ Initialize Kubernetes Cluster  ( On Local VM )
 
 The following playbook initializes the Kubernetes Control Plane and automatically joins the worker nodes.
 
@@ -490,38 +486,23 @@ Cluster Ready
 
 # 📸 Expected Output
 
-> Insert the screenshots showing successful `kubeadm init` and worker node join.
+>  <img width="1078" height="275" alt="image" src="https://github.com/user-attachments/assets/10c73313-4eda-4bb2-9a66-d96156b703fd" />
 
 ---
 
 # ✅ Verify Kubernetes Cluster
 
-Login to the Control Plane node.
+Login to the Control Plane node.  ( From Local VM )
 
 ```bash
 ssh -i ~/.ssh/easypay-k8s ec2-user@<CONTROL_PLANE_PUBLIC_IP>
 ```
+From Control Plane Node : 
+Check the status of the nodes created by playbook : ```kubectl get nodes -o wide```
+Check the status of the pods running int the k8s cluster : ```kubectl get pods -Ao wide```
 
-Verify nodes.
-
-```bash
-kubectl get nodes -o wide
-```
-
-Expected output:
-
-```text
-NAME          STATUS   ROLES           VERSION
-master        Ready    control-plane
-worker-1      Ready    <none>
-worker-2      Ready    <none>
-```
-
-Verify all pods.
-
-```bash
-kubectl get pods -A -o wide
-```
+Expected output: 
+> <img width="1292" height="392" alt="image" src="https://github.com/user-attachments/assets/b39e5c64-5a0b-4c5d-8d9c-b2cd0edc83d0" />
 
 ---
 
@@ -553,7 +534,7 @@ kubectl get pods -A -o wide
 
 ---
 
-# 🔗 Configure Provider IDs
+# 🔗 Configure Provider IDs  ( On Local VM )
 
 AWS Load Balancer Controller requires Kubernetes worker nodes to have their AWS ProviderID configured.
 
@@ -575,8 +556,8 @@ Without it:
 - LoadBalancer Services will fail to register targets correctly.
 
 ---
-
-# 🔍 Verify ProviderID
+ 
+# 🔍 Verify ProviderID ( From Control Plane Node )
 
 ```bash
 kubectl describe node | egrep -i "^Name|provider"
@@ -594,7 +575,7 @@ ProviderID: aws:///us-east-1/i-0123456789abcdef0
 
 # 📸 Expected Output
 
-> Insert the ProviderID verification screenshot from the original document.
+> <img width="662" height="107" alt="image" src="https://github.com/user-attachments/assets/6c41c6ce-708b-4805-bdae-c8f7ea9f4768" />
 
 ---
 
@@ -648,7 +629,7 @@ Cluster Ready for Application Deployment
 
 ---
 
-# 📂 Verify Manifest Files
+# 📂 Verify Manifest Files ( From Control Plane Node )
 
 SSH into the Control Plane node and verify the copied manifests.
 
@@ -664,12 +645,13 @@ You should see files similar to:
 3.network-policy.yaml
 4.rbac.yaml
 ```
+<img width="586" height="172" alt="image" src="https://github.com/user-attachments/assets/ddd965a9-704f-41d8-8952-0539ade4a73e" />
 
 ---
 
 # 📸 Expected Output
 
-> Insert the screenshots showing successful installation of the AWS Load Balancer Controller, Metrics Server, and copied manifest files.
+> <img width="1292" height="363" alt="image" src="https://github.com/user-attachments/assets/9a00cedc-064c-4095-b476-49c1b6296f05" />
 
 ---
 
@@ -813,7 +795,7 @@ Docker Hub / AWS ECR
 
 Before pushing Docker images, authenticate with your image repository.
 
-## Docker Hub
+## Docker Hub ( From Control Plane Node )
 
 ```bash
 docker login
@@ -823,7 +805,7 @@ Or use a Personal Access Token (PAT).
 
 ---
 
-## AWS Public ECR
+## AWS Public ECR ( From Control Plane Node )
 
 ```bash
 aws ecr-public get-login-password --region us-east-1 \
@@ -834,7 +816,7 @@ aws ecr-public get-login-password --region us-east-1 \
 
 ---
 
-## AWS Private ECR
+## AWS Private ECR ( From Control Plane Node )
 
 ```bash
 aws ecr get-login-password --region us-east-1 \
@@ -845,7 +827,7 @@ aws ecr get-login-password --region us-east-1 \
 
 ---
 
-# 🏗 Build Backend Image
+# 🏗 Build Backend Image ( From Control Plane Node )
 
 Navigate to the backend source directory.
 
@@ -871,6 +853,7 @@ Push the image.
 ```bash
 docker push saurabhnegi2306/easypay:backend-v1
 ```
+<img width="1078" height="771" alt="image" src="https://github.com/user-attachments/assets/d6f87f87-cfbd-4313-a2c7-30424bdd2ede" />
 
 ---
 
@@ -900,7 +883,7 @@ docker push
 
 ---
 
-# 🏗 Build Frontend Image
+# 🏗 Build Frontend Image ( From Control Plane Node )
 
 Navigate to the frontend directory.
 
@@ -926,6 +909,8 @@ Push the image.
 ```bash
 docker push saurabhnegi2306/easypay:frontend-v1
 ```
+
+<img width="1078" height="771" alt="image" src="https://github.com/user-attachments/assets/1e2123b5-aa3d-45b9-9983-5a3672423a27" />
 
 ---
 
@@ -954,19 +939,8 @@ docker push
 ```
 
 ---
-
-# 📸 Expected Output
-
-> Insert the original screenshots showing:
->
-> - Docker build output
-> - Docker tag
-> - Docker push
-> - Docker Hub repository
-
----
-
-# 📝 Update Kubernetes Deployment Manifest
+ 
+# 📝 Update Kubernetes Deployment Manifest ( From Control Plane Node )
 
 After pushing the images, update the deployment manifest with your image names.
 
@@ -990,13 +964,14 @@ If you are using the same repository names as the lab guide, no changes are requ
 
 ---
 
-# ☸ Deploy the EasyPay Application
+# ☸ Deploy the EasyPay Application ( From Control Plane Node )
 
 Deploy all Kubernetes resources.
 
 ```bash
 kubectl apply -f 1.application.yaml
 ```
+<img width="659" height="182" alt="image" src="https://github.com/user-attachments/assets/028b8425-7b7b-4088-a77f-c62420effcfb" />
 
 This manifest deploys:
 
@@ -1008,6 +983,9 @@ This manifest deploys:
 - MySQL StatefulSet
 - ClusterIP Services
 - LoadBalancer Service
+
+<img width="1236" height="180" alt="image" src="https://github.com/user-attachments/assets/1a45fe9a-15ac-40d4-8cb5-28707301cd32" />
+
 
 ---
 
@@ -1051,31 +1029,22 @@ Namespace (easypay)
 
 ---
 
-# 🔍 Verify the Deployment
+# 🔍 Verify the Deployment ( From Control Plane Node )
 
-List all Pods.
-
-```bash
-kubectl get pods -n easypay -o wide
-```
-
-List all Services.
+List all Pods and Services.
 
 ```bash
-kubectl get svc -n easypay
+kubectl get pods,svc -n easypay -o wide
 ```
 
-Expected resources:
+Expected Output:
 
-```text
-frontend
-backend
-mysql
-```
+<img width="1158" height="52" alt="image" src="https://github.com/user-attachments/assets/41fa69a7-1cd4-4102-98a6-07fb5cf56c2d" />
+
 
 ---
 
-# 🌐 Verify AWS Network Load Balancer
+# 🌐 Verify AWS Network Load Balancer ( From Control Plane Node )
 
 The Frontend Service is exposed as a Kubernetes **LoadBalancer** Service.
 
@@ -1087,12 +1056,12 @@ kubectl get svc frontend -n easypay
 
 Example:
 
-```text
-NAME        TYPE           EXTERNAL-IP
-frontend    LoadBalancer   a12345.elb.amazonaws.com
-```
+<img width="1208" height="198" alt="image" src="https://github.com/user-attachments/assets/67f5dec7-c955-4d67-acc5-a365a1da3ab3" />
 
-You should also see a Network Load Balancer created automatically in the AWS EC2 Console.
+
+You should also see a Network Load Balancer created automatically in the AWS EC2 Console. It might take 3-5 minutes before it is in AVAILABLE state.
+
+<img width="1078" height="144" alt="image" src="https://github.com/user-attachments/assets/e159e249-3cc3-4a39-b2c5-c945097a9201" />
 
 ---
 
@@ -1126,18 +1095,6 @@ MySQL Service
     ▼
 MySQL StatefulSet
 ```
-
----
-
-# 📸 Expected Output
-
-> Insert the screenshots showing:
->
-> - Successful Pods
-> - Services
-> - LoadBalancer EXTERNAL-IP
-> - AWS Network Load Balancer
-> - Application UI
 
 ---
 
@@ -1215,7 +1172,7 @@ In this project, HPA monitors **CPU utilization** and scales the backend deploym
 
 ---
 
-# Deploy HPA
+# Deploy HPA ( From Control Plane Node )
 
 Apply the HPA manifest.
 
@@ -1231,14 +1188,11 @@ kubectl get hpa -n easypay
 
 Expected Output
 
-```text
-NAME          REFERENCE                 TARGETS     MINPODS   MAXPODS
-backend-hpa   Deployment/backend        10%/50%     1         5
-```
+<img width="1078" height="144" alt="image" src="https://github.com/user-attachments/assets/68818ee5-4535-406d-bce4-568c1538c9af" />
 
 ---
 
-# Verify Resource Metrics
+# Verify Resource Metrics ( From Control Plane Node )
 
 Check pod resource consumption.
 
@@ -1252,9 +1206,12 @@ Check node resource utilization.
 kubectl top nodes
 ```
 
+
+<img width="1078" height="205" alt="image" src="https://github.com/user-attachments/assets/6a1a693b-65d8-4009-83b4-846b7553ff28" />
+
 ---
 
-# Simulate CPU Load
+# Simulate CPU Load ( From Control Plane Node )
 
 Identify the backend pod.
 
@@ -1268,6 +1225,7 @@ Install the stress utility.
 kubectl exec -it -n easypay <BACKEND_POD> \
 -- sh -c "apt update && apt install -y stress"
 ```
+<img width="572" height="71" alt="image" src="https://github.com/user-attachments/assets/5e1d3487-9bf3-4066-9c98-6fd269d7c816" />
 
 Run the stress test.
 
@@ -1278,7 +1236,7 @@ kubectl exec -n easypay <BACKEND_POD> \
 
 ---
 
-# Monitor Autoscaling
+# Monitor Autoscaling ( From Control Plane Node )
 
 Watch the HPA status.
 
@@ -1313,13 +1271,9 @@ After the CPU load ends, Kubernetes automatically scales the deployment back dow
 
 ---
 
-# 📸 Expected Output
+# 📸 Expected Output ( From Control Plane Node )
 
-> Insert the HPA screenshots from the original document:
->
-> - `kubectl top pods`
-> - `kubectl get hpa`
-> - Scaling demonstration
+<img width="1078" height="440" alt="image" src="https://github.com/user-attachments/assets/7a28daf9-5f26-49d3-b1e9-58deffe0f592" />
 
 ---
 
@@ -1354,7 +1308,7 @@ All Allowed
 
 ---
 
-# Create Test Pods
+# Create Test Pods ( From Control Plane Node )
 
 Create a BusyBox pod in the application namespace.
 
@@ -1375,10 +1329,11 @@ kubectl run unauthorized-client2 \
 --restart=Never \
 -- sleep 3600
 ```
+<img width="1078" height="112" alt="image" src="https://github.com/user-attachments/assets/48fe2941-2e0c-4a51-bc5c-f8acb25130b4" />
 
 ---
 
-# Verify Connectivity
+# Verify Connectivity ( From Control Plane Node )
 
 Test MySQL connectivity.
 
@@ -1406,10 +1361,12 @@ http://backend.easypay.svc.cluster.local:5000/health
 ```
 
 Before applying the Network Policy, all requests should succeed.
+<img width="1078" height="112" alt="image" src="https://github.com/user-attachments/assets/eda77dce-2f3e-461a-b2a6-7d1bde521e69" />
+
 
 ---
 
-# Apply Network Policy
+# Apply Network Policy ( From Control Plane Node )
 
 ```bash
 kubectl apply -f 3.network-policy.yaml
@@ -1418,6 +1375,7 @@ kubectl apply -f 3.network-policy.yaml
 Re-run the connectivity tests.
 
 Unauthorized access should now be denied.
+<img width="883" height="170" alt="image" src="https://github.com/user-attachments/assets/251ba4b9-9936-4813-bd97-967273eea4df" />
 
 ---
 
@@ -1428,6 +1386,7 @@ kubectl delete -f 3.network-policy.yaml
 ```
 
 Connectivity should be restored.
+<img width="864" height="89" alt="image" src="https://github.com/user-attachments/assets/1312f554-881b-435e-8c6c-2d7c4b17f87f" />
 
 ---
 
@@ -1464,23 +1423,18 @@ Blocked
 
 ---
 
-# 📸 Expected Output
-
-> Insert the Network Policy screenshots from the original document.
-
----
-
 # 👤 Role-Based Access Control (RBAC)
 
 RBAC limits what authenticated users or service accounts are allowed to perform within the cluster.
 
 ---
 
-# Deploy RBAC Resources
+# Deploy RBAC Resources ( From Control Plane Node )
 
 ```bash
 kubectl apply -f 4.rbac.yaml
 ```
+<img width="1077" height="238" alt="image" src="https://github.com/user-attachments/assets/5da806c3-468a-41ef-b1b1-29570fde35f4" />
 
 ---
 
@@ -1515,6 +1469,7 @@ Expected Output
 ```text
 yes
 ```
+<img width="1078" height="179" alt="image" src="https://github.com/user-attachments/assets/18b9fa4b-da7d-4419-bfc0-66bcaad89135" />
 
 ---
 
@@ -1542,6 +1497,7 @@ Expected Output
 ```text
 no
 ```
+<img width="1078" height="167" alt="image" src="https://github.com/user-attachments/assets/2cff7c35-0450-456d-ae23-355a4f830cfa" />
 
 ---
 
@@ -1562,19 +1518,14 @@ no
 
 ---
 
-# 📸 Expected Output
-
-> Insert the RBAC screenshots from the original document.
-
----
-
-# 🌐 Application Verification
+# 🌐 Application Verification ( From Control Plane Node )
 
 Retrieve the frontend service.
 
 ```bash
 kubectl get svc frontend -n easypay
 ```
+<img width="1078" height="86" alt="image" src="https://github.com/user-attachments/assets/bb4c7a2a-0b5c-4ede-9633-ca507449ad65" />
 
 Open the AWS Network Load Balancer URL in your browser.
 
@@ -1607,6 +1558,7 @@ Database Service
      ▼
 MySQL StatefulSet
 ```
+<img width="1078" height="403" alt="image" src="https://github.com/user-attachments/assets/bda56bcf-2133-4674-92eb-2383d5a93627" />
 
 ---
 
@@ -1624,7 +1576,7 @@ Backing up ETCD enables cluster recovery in the event of failures.
 
 ---
 
-# Install ETCDCTL
+# Install ETCDCTL ( On Local VM )
 
 Execute the Ansible playbook.
 
@@ -1634,13 +1586,14 @@ ansible-playbook 5.etcdctl-install.yml
 
 ---
 
-# Create ETCD Snapshot
+# Create ETCD Snapshot 
 
 The commands are available in the provided script.
 
 ```bash
-5.etcd-snapshot.sh
+bash ~/kubernetes/5.etcd-snapshot.sh
 ```
+<img width="1406" height="409" alt="image" src="https://github.com/user-attachments/assets/4453d14e-477c-43f7-9b5c-e0d399494ba0" />
 
 Alternatively, execute the commands individually as documented in the source guide.
 
